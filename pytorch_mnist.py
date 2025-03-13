@@ -1,7 +1,3 @@
-# ClearML - Example of Pytorch mnist training integration
-#
-from __future__ import print_function
-
 import argparse
 import os
 from tempfile import gettempdir
@@ -11,8 +7,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
-
-from clearml import Task, Logger
 
 
 class Net(nn.Module):
@@ -44,8 +38,6 @@ def train(args, model, device, train_loader, optimizer, epoch):
         loss.backward()
         optimizer.step()
         if batch_idx % args.log_interval == 0:
-            Logger.current_logger().report_scalar(
-                "train", "loss", iteration=(epoch * len(train_loader) + batch_idx), value=loss.item())
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                        100. * batch_idx / len(train_loader), loss.item()))
@@ -65,20 +57,12 @@ def test(args, model, device, test_loader, epoch):
 
     test_loss /= len(test_loader.dataset)
 
-    Logger.current_logger().report_scalar(
-        "test", "loss", iteration=epoch, value=test_loss)
-    Logger.current_logger().report_scalar(
-        "test", "accuracy", iteration=epoch, value=(correct / len(test_loader.dataset)))
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
 
 
 def main():
-    # Connecting ClearML with the current process,
-    # from here on everything is logged automatically
-    task = Task.init(project_name='examples', task_name='PyTorch MNIST train')
-
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
     parser.add_argument('--batch-size', type=int, default=64, metavar='N',
